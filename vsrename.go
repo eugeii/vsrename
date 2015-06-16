@@ -42,9 +42,9 @@ func init() {
 
 		fmt.Printf("  Examples:\n")
 		fmt.Printf("    (show renames without actually renaming)\n")
-		fmt.Printf("    vsrename --subext=\"srt\" --vidext=\"mp4\" --subregex=\".*1x([0-9]+).*\" --vidregex=\".*S01E([0-9]+).*\"\n\n")
+		fmt.Printf("    vsrename --subext=\"srt\" --vidext=\"mp4\" --subregex=\".*?1x([0-9]+).*\" --vidregex=\".*?S01E([0-9]+).*\"\n\n")
 		fmt.Printf("    (show renames and actually rename)\n")
-		fmt.Printf("    vsrename -w --subext=\"srt\" --vidext=\"mp4\" --subregex=\".*1x([0-9]+).*\" --vidregex=\".*S01E([0-9]+).*\"\n\n")
+		fmt.Printf("    vsrename -w --subext=\"srt\" --vidext=\"mp4\" --subregex=\".*?1x([0-9]+).*\" --vidregex=\".*?S01E([0-9]+).*\"\n\n")
 
 		flag.PrintDefaults()
 		os.Exit(0)
@@ -129,7 +129,7 @@ func main() {
 		}
 
 		// Could not find matching subtitle file.
-		fmt.Printf("  [X] No subtitle file found for '%v'. Skipping.\n", vf)
+		fmt.Printf("  [X] '%v' -> No subtitle file found. Skipping.\n", vf)
 	}
 
 	// Show number of files renamed.
