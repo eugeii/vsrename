@@ -122,7 +122,7 @@ func main() {
 			newVf := addExt(removeExt(sf, subExt), vidExt)
 			fmt.Printf("  [*] '%v' -> '%v'\n", vf, newVf)
 			if isWrite {
-				numRenamed += 1
+				numRenamed++
 				os.Rename(vf, newVf)
 			}
 			continue
