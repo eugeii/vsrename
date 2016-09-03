@@ -42,21 +42,23 @@ func init() {
 
 		fmt.Printf("  Examples:\n")
 		fmt.Printf("    (show renames without actually renaming)\n")
-		fmt.Printf("    vsrename --subext=\"srt\" --vidext=\"mp4\" --subregex=\".*?1x([0-9]+).*\" --vidregex=\".*?S01E([0-9]+).*\"\n\n")
+		fmt.Printf("    vsrename -vext='mkv' -subregex='x([0-9]+)' -vidregex='E([0-9]+)'\n\n")
 		fmt.Printf("    (show renames and actually rename)\n")
-		fmt.Printf("    vsrename -w --subext=\"srt\" --vidext=\"mp4\" --subregex=\".*?1x([0-9]+).*\" --vidregex=\".*?S01E([0-9]+).*\"\n\n")
+		fmt.Printf("    vsrename -vext='mkv' -subregex='x([0-9]+)' -vidregex='E([0-9]+) -w'\n\n")
 
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
 
 	// Subtitles.
-	flag.StringVar(&subExt, "subext", "srt", "The extension of the subtitle files (without leading '.', e.g. 'srt')")
-	flag.StringVar(&subMatcher, "subregex", "", "The regex to identify episode of each subtitle file (as a regex group)")
+	flag.StringVar(&subExt, "subext", "srt", "The extension of the subtitle files (e.g. 'srt')")
+	flag.StringVar(&vidExt, "sext", "srt", "The extension of the subtitle files (e.g. 'srt') (shorthand)")
+	flag.StringVar(&subMatcher, "subregex", "x([0-9]+)", "The regex to identify episode of each subtitle file (as a regex group)")
 
 	// Videos.
-	flag.StringVar(&vidExt, "vidext", "mp4", "The extension of the video files (without leading '.', e.g. 'mp4')")
-	flag.StringVar(&vidMatcher, "vidregex", "", "The regex to identify episode of each video file (as a regex group)")
+	flag.StringVar(&vidExt, "vidext", "mkv", "The extension of the video files (e.g. 'mp4')")
+	flag.StringVar(&vidExt, "vext", "mkv", "The extension of the video files (e.g. 'mp4') (shorthand)")
+	flag.StringVar(&vidMatcher, "vidregex", "E([0-9]+)", "The regex to identify episode of each video file (as a regex group)")
 
 	// Paths.
 	flag.StringVar(&dir, "location", ".", "The path to the location of the video and subtitle files")
@@ -76,12 +78,18 @@ func main() {
 		fmt.Printf("Regex pattern for subtitle and videos required. Aborting.\n")
 		return
 	}
+	// subMatcher = fmt.Sprintf(".*?%v.*", subMatcher)
+	// vidMatcher = fmt.Sprintf(".*?%v.*", vidMatcher)
 	subRegex := regexp.MustCompile(subMatcher)
 	vidRegex := regexp.MustCompile(vidMatcher)
 
 	// Find subtitle and video files.
 	subFiles, _ := filepath.Glob(filepath.Join(dir, "*."+subExt))
 	vidFiles, _ := filepath.Glob(filepath.Join(dir, "*."+vidExt))
+
+	// fmt.Printf("sub loc: %v", filepath.Join(dir, "*."+subExt))
+	// spew.Dump(subFiles)
+
 	fmt.Printf("Found total %v video files (*.%v) and %v subtitle files (*.%v).\n", len(vidFiles), vidExt, len(subFiles), subExt)
 	if len(vidFiles) <= 0 {
 		fmt.Printf("No video files found. Aborting.\n")
