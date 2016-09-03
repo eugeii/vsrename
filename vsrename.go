@@ -24,9 +24,10 @@ func addExt(filenameWithoutExt, ext string) string {
 var (
 	subExt     string
 	subMatcher string
+	subPath    string
 	vidExt     string
 	vidMatcher string
-	dir        string
+	vidPath    string
 	isWrite    bool
 )
 
@@ -61,8 +62,8 @@ func init() {
 	flag.StringVar(&vidMatcher, "vidregex", "E([0-9]+)", "The regex to identify episode of each video file (as a regex group)")
 
 	// Paths.
-	flag.StringVar(&dir, "location", ".", "The path to the location of the video and subtitle files")
-	flag.StringVar(&dir, "l", ".", "The path to the location of the video and subtitle files")
+	flag.StringVar(&vidPath, "vidpath", ".", "The path to the location of the video and subtitle files")
+	flag.StringVar(&subPath, "subpath", "./subs", "The path to the location of the video and subtitle files")
 
 	// Commit the rename.
 	flag.BoolVar(&isWrite, "write", false, "Actually perform the rename")
@@ -78,17 +79,12 @@ func main() {
 		fmt.Printf("Regex pattern for subtitle and videos required. Aborting.\n")
 		return
 	}
-	// subMatcher = fmt.Sprintf(".*?%v.*", subMatcher)
-	// vidMatcher = fmt.Sprintf(".*?%v.*", vidMatcher)
 	subRegex := regexp.MustCompile(subMatcher)
 	vidRegex := regexp.MustCompile(vidMatcher)
 
 	// Find subtitle and video files.
-	subFiles, _ := filepath.Glob(filepath.Join(dir, "*."+subExt))
-	vidFiles, _ := filepath.Glob(filepath.Join(dir, "*."+vidExt))
-
-	// fmt.Printf("sub loc: %v", filepath.Join(dir, "*."+subExt))
-	// spew.Dump(subFiles)
+	subFiles, _ := filepath.Glob(filepath.Join(subPath, "*."+subExt))
+	vidFiles, _ := filepath.Glob(filepath.Join(vidPath, "*."+vidExt))
 
 	fmt.Printf("Found total %v video files (*.%v) and %v subtitle files (*.%v).\n", len(vidFiles), vidExt, len(subFiles), subExt)
 	if len(vidFiles) <= 0 {
