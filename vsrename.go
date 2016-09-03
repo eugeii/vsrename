@@ -123,7 +123,10 @@ func main() {
 		// Find matching subtitle file.
 		if sf, ok := subtitles[episode]; ok {
 			// Video file takes name of subtitle file (retaining video extension).
-			newVf := addExt(removeExt(sf, subExt), vidExt)
+			newVf := filepath.Join(
+				vidPath, // Place renamed files in same directory as original video files
+				filepath.Base(addExt(removeExt(sf, subExt), vidExt)), // Rename video files to subtitle files
+			)
 			fmt.Printf("  [*] '%v' -> '%v'\n", vf, newVf)
 			if isWrite {
 				numRenamed++
