@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -19,6 +20,59 @@ func removeExt(filename, ext string) string {
 // returns the filename with the extension.
 func addExt(filenameWithoutExt, ext string) string {
 	return filenameWithoutExt + "." + ext
+}
+
+func copyFile(src, dst string) (err error) {
+	sfi, err := os.Stat(src)
+	if err != nil {
+		return
+	}
+	if !sfi.Mode().IsRegular() {
+		// cannot copy non-regular files (e.g., directories,
+		// symlinks, devices, etc.)
+		return fmt.Errorf("CopyFile: non-regular source file %s (%q)", sfi.Name(), sfi.Mode().String())
+	}
+	dfi, err := os.Stat(dst)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return
+		}
+	} else {
+		if !(dfi.Mode().IsRegular()) {
+			return fmt.Errorf("CopyFile: non-regular destination file %s (%q)", dfi.Name(), dfi.Mode().String())
+		}
+		if os.SameFile(sfi, dfi) {
+			return
+		}
+	}
+	if err = os.Link(src, dst); err == nil {
+		return
+	}
+	err = copyFileContents(src, dst)
+	return
+}
+
+func copyFileContents(src, dst string) (err error) {
+	in, err := os.Open(src)
+	if err != nil {
+		return
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+	if _, err = io.Copy(out, in); err != nil {
+		return
+	}
+	err = out.Sync()
+	return
 }
 
 var (
@@ -139,8 +193,19 @@ func main() {
 			fmt.Printf("  [*] '%v' -> '%v'\n", vf, newVf)
 			if isWrite {
 				numRenamed++
+
+				// Rename video file.
 				os.Rename(vf, newVf)
+
+				// Copy subtitle file to where video file is.
+				newSf := filepath.Join(vidPath, filepath.Base(sf))
+				err = copyFile(sf, newSf)
+				if err != nil {
+					fmt.Printf("  [!] Copy subtitle '%v' to '%v': %v\n", sf, newSf, err)
+					continue
+				}
 			}
+
 			continue
 		}
 
