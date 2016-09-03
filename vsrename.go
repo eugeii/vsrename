@@ -83,8 +83,17 @@ func main() {
 	vidRegex := regexp.MustCompile(vidMatcher)
 
 	// Find subtitle and video files.
-	subFiles, _ := filepath.Glob(filepath.Join(subPath, "*."+subExt))
-	vidFiles, _ := filepath.Glob(filepath.Join(vidPath, "*."+vidExt))
+	subFiles, err := filepath.Glob(filepath.Join(subPath, "*."+subExt))
+	if err != nil {
+		fmt.Printf("Find subtitle files: %v\n", err)
+		return
+	}
+
+	vidFiles, err := filepath.Glob(filepath.Join(vidPath, "*."+vidExt))
+	if err != nil {
+		fmt.Printf("Find video files: %v\n", err)
+		return
+	}
 
 	fmt.Printf("Found total %v video files (*.%v) and %v subtitle files (*.%v).\n", len(vidFiles), vidExt, len(subFiles), subExt)
 	if len(vidFiles) <= 0 {
